@@ -24,6 +24,15 @@ R14
 L82
 "#; // TODO: Enter test input
 
+enum Move {
+    Left(usize),
+    Right(usize),
+}
+
+fn parse_moves_from_file<R: BufRead>(reader: R) -> Result<Vec<Move>> {
+
+})
+
 fn part1<R: BufRead>(reader: R) -> Result<usize> {
     // TODO: Solve Part 1 of the puzzle
     let answer = reader.lines().flatten().count();
