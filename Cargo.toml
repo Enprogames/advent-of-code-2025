@@ -1,0 +1,12 @@
+[package]
+name = "advent-of-code-2025"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0"
+code-timing-macros = { version = "0.0.6", features = ["release"] }
+const_format = "0.2"
+itertools = "0.14.0"
+log = { version = "0.4.28", features = [] }
+regex = "1.12"
