@@ -12,7 +12,16 @@ const INPUT_FILE: &str = concatcp!("input/", DAY, ".txt");
 // const INPUT_FILE_BIG_BOY: &str = concatcp!("input/", "bigboy", DAY, ".txt");
 
 const TEST: &str = r#"
-
+L68
+L30
+R48
+L5
+R60
+L55
+L1
+L99
+R14
+L82
 "#; // TODO: Enter test input
 
 fn part1<R: BufRead>(reader: R) -> Result<usize> {
@@ -32,7 +41,7 @@ fn main() -> Result<()> {
     //region Part 1
     println!("=== Part 1 ===");
 
-    assert_eq!(2, part1(BufReader::new(TEST.as_bytes()))?);
+    assert_eq!(3, part1(BufReader::new(TEST.as_bytes()))?);
 
     let input_file = BufReader::new(File::open(INPUT_FILE)?);
     let result = time_snippet!(part1(input_file)?);
