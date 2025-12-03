@@ -6,32 +6,14 @@ use code_timing_macros::time_snippet;
 use const_format::concatcp;
 use advent_of_code_2025::*;
 
-const DAY: &str = "01";
+const DAY: &str = "02"; // TODO: Fill the day
 const INPUT_FILE: &str = concatcp!("input/", DAY, ".txt");
 // TODO: Get big boy input
 // const INPUT_FILE_BIG_BOY: &str = concatcp!("input/", "bigboy", DAY, ".txt");
 
 const TEST: &str = r#"
-L68
-L30
-R48
-L5
-R60
-L55
-L1
-L99
-R14
-L82
+
 "#; // TODO: Enter test input
-
-enum Move {
-    Left(usize),
-    Right(usize),
-}
-
-fn parse_moves_from_file<R: BufRead>(reader: R) -> Result<Vec<Move>> {
-
-})
 
 fn part1<R: BufRead>(reader: R) -> Result<usize> {
     // TODO: Solve Part 1 of the puzzle
@@ -50,7 +32,7 @@ fn main() -> Result<()> {
     //region Part 1
     println!("=== Part 1 ===");
 
-    assert_eq!(3, part1(BufReader::new(TEST.as_bytes()))?);
+    assert_eq!(2, part1(BufReader::new(TEST.as_bytes()))?);
 
     let input_file = BufReader::new(File::open(INPUT_FILE)?);
     let result = time_snippet!(part1(input_file)?);
