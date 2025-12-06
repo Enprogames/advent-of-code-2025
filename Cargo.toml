@@ -12,3 +12,6 @@ log = { version = "0.4", features = [] }
 regex = "1.12"
 rustc-hash = "2.1"  # Fast HashMap
 rayon = "1.11"
+
+[dev-dependencies]
+rstest = "0.26"
