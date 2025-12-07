@@ -1,7 +1,7 @@
 use anyhow::*;
+use rayon::prelude::*;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::time::Instant;
 use code_timing_macros::time_snippet;
 use const_format::concatcp;
 use advent_of_code_2025::*;
@@ -22,21 +22,57 @@ L1
 L99
 R14
 L82
-"#; // TODO: Enter test input
+"#;
 
 enum Move {
-    Left(usize),
-    Right(usize),
+    Left(isize),
+    Right(isize),
 }
 
-fn parse_moves_from_file<R: BufRead>(reader: R) -> Result<Vec<Move>> {
+fn parse_moves_from_file<R: BufRead>(mut reader: R) -> Result<Vec<Move>> {
+    let mut buffer = Vec::new();
+    let _ = reader.read_to_end(&mut buffer).context("Failed to read file as bytes")?;
 
-})
+    let result = buffer.par_split(|&c| c == b'\n')
+        .filter(|&mov_str| !mov_str.is_empty())
+        .map(|mov_str| {
+            let (rotation_count, _) = parse_int_ascii(&mov_str[1..]);
+
+            if mov_str[0] == b'L' {
+                Move::Left(rotation_count as isize)
+            } else {
+                Move::Right(rotation_count as isize)
+            }
+        })
+        .collect::<Vec<Move>>();
+
+    Ok(result)
+}
 
 fn part1<R: BufRead>(reader: R) -> Result<usize> {
-    // TODO: Solve Part 1 of the puzzle
-    let answer = reader.lines().flatten().count();
-    Ok(answer)
+    let moves = parse_moves_from_file(reader)?;
+
+    let dial_start = 50;
+    let (_, result) = moves.iter().fold((dial_start, 0), |(running_sum, zero_count), cur_move| {
+        let new_pos = match cur_move {
+            Move::Left(val) => {
+                (running_sum - val).rem_euclid(100)  // Mathematical modulo operator
+            },
+            Move::Right(val) => {
+                (running_sum + val).rem_euclid(100)  // Mathematical modulo operator
+            }
+        };
+
+        let new_zero_count =  if new_pos == 0 {
+            zero_count + 1
+        } else {
+            zero_count
+        };
+
+        (new_pos, new_zero_count)
+    });
+
+    Ok(result)
 }
 
 fn part2<R: BufRead>(reader: R) -> Result<usize> {

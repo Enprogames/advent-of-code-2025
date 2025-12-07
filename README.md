@@ -8,7 +8,8 @@ My private leaderboard code: `4319765-535c51ef`
 
 | Day | Code                                    |                  Stars                   |
 | ---:|-----------------------------------------|:----------------------------------------:|
-| 1   | [src/bin/01.rs](src/bin/01.rs)          |                                          |
+| 1   | [src/bin/01.rs](src/bin/01.rs)          |                   ⭐️                    |
+| 1   | [src/bin/02.rs](src/bin/02.rs)          |                                          |
 
 ## Running
 
