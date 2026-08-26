@@ -5,13 +5,13 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0"
-code-timing-macros = { version = "0.0.6", features = ["release"] }
+code-timing-macros = { version = "0.0.7", features = ["release"] }
 const_format = "0.2"
-itertools = "0.14.0"
+itertools = "0.15.0"
 log = { version = "0.4", features = [] }
-regex = "1.12"
+regex = "1.13"
 rustc-hash = "2.1"  # Fast HashMap
-rayon = "1.11"
+rayon = "1.12"
 
 [dev-dependencies]
 rstest = "0.26"
