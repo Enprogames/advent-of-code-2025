@@ -1,119 +1,169 @@
-use anyhow::*;
-use rayon::prelude::*;
+use anyhow::{Context, Result, anyhow};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use code_timing_macros::time_snippet;
-use const_format::concatcp;
-use advent_of_code_2025::*;
+use std::time::Instant;
 
-const DAY: &str = "01";
-const INPUT_FILE: &str = concatcp!("input/", DAY, ".txt");
-// TODO: Get big boy input
-// const INPUT_FILE_BIG_BOY: &str = concatcp!("input/", "bigboy", DAY, ".txt");
-
-const TEST: &str = r#"
-L68
-L30
-R48
-L5
-R60
-L55
-L1
-L99
-R14
-L82
-"#;
-
-enum Move {
-    Left(isize),
-    Right(isize),
-}
-
-fn parse_moves_from_file<R: BufRead>(mut reader: R) -> Result<Vec<Move>> {
-    let mut buffer = Vec::new();
-    let _ = reader.read_to_end(&mut buffer).context("Failed to read file as bytes")?;
-
-    let result = buffer.par_split(|&c| c == b'\n')
-        .filter(|&mov_str| !mov_str.is_empty())
-        .map(|mov_str| {
-            let (rotation_count, _) = parse_int_ascii(&mov_str[1..]);
-
-            if mov_str[0] == b'L' {
-                Move::Left(rotation_count as isize)
-            } else {
-                Move::Right(rotation_count as isize)
-            }
-        })
-        .collect::<Vec<Move>>();
-
-    Ok(result)
-}
-
-fn part1<R: BufRead>(reader: R) -> Result<usize> {
-    let moves = parse_moves_from_file(reader)?;
-
-    let dial_start = 50;
-    let (_, result) = moves.iter().fold((dial_start, 0), |(running_sum, zero_count), cur_move| {
-        let new_pos = match cur_move {
-            Move::Left(val) => {
-                (running_sum - val).rem_euclid(100)  // Mathematical modulo operator
-            },
-            Move::Right(val) => {
-                (running_sum + val).rem_euclid(100)  // Mathematical modulo operator
-            }
-        };
-
-        let new_zero_count =  if new_pos == 0 {
-            zero_count + 1
-        } else {
-            zero_count
-        };
-
-        (new_pos, new_zero_count)
-    });
-
-    Ok(result)
-}
-
-fn part2<R: BufRead>(reader: R) -> Result<usize> {
-    // TODO: Solve Part 2 of the puzzle
-    Ok(0)
-}
+const INPUT_PATH: &str = "input/01.txt";
 
 fn main() -> Result<()> {
-    start_day(DAY);
+    println!("--- Day 01 ---");
 
-    //region Part 1
-    println!("=== Part 1 ===");
+    // Part 1
+    let start = Instant::now();
 
-    assert_eq!(3, part1(BufReader::new(TEST.as_bytes()))?);
+    let mut reader1 = reader_from_file_path(INPUT_PATH)?;
+    let p1 = part1(&mut reader1)?;
+    println!("Part 1: {} ({:.2?})", p1, start.elapsed());
 
-    let input_file = BufReader::new(File::open(INPUT_FILE)?);
-    let result = time_snippet!(part1(input_file)?);
-    println!("Result = {}", result);
-
-    // TODO: Uncomment for big boy result
-    // let result = time_snippet!(part1(
-    //     BufReader::new(File::open(INPUT_FILE_BIG_BOY)?)
-    // )?);
-    // println!("Result (big boy) = {}", result);
-    //endregion
-
-    //region Part 2
-    // println!("\n=== Part 2 ===");
-    //
-    // assert_eq!(0, part2(BufReader::new(TEST.as_bytes()))?);
-    //
-    // let input_file = BufReader::new(File::open(INPUT_FILE)?);
-    // let result = time_snippet!(part2(input_file)?);
-    // println!("Result = {}", result);
-
-    // TODO: Uncomment for big boy result
-    // let result = time_snippet!(part2(
-    //     BufReader::new(File::open(INPUT_FILE_BIG_BOY)?)
-    // )?);
-    // println!("Result (big boy) = {}", result);
-    //endregion
+    // Part 2
+    let start = Instant::now();
+    let mut reader2 = reader_from_file_path(INPUT_PATH)?;
+    let p2 = part2(&mut reader2)?;
+    println!("Part 2: {} ({:.2?})", p2, start.elapsed());
 
     Ok(())
+}
+
+/// Find number of times the lock stops at 0 while making forwards and reverse rotations
+/// from 0 to 99.
+fn part1(reader: &mut impl BufRead) -> Result<usize> {
+
+    let mut result = 0;
+    let mut position: i32 = 50;
+    let mut buf = Vec::new();
+
+    loop {
+        // Continually clearing keeps this loop zero-allocation
+        buf.clear();
+
+        // Read the line
+        let bytes_read = reader.read_until(b'\n', &mut buf)?;
+
+        if bytes_read == 0 { break; }  // EOF
+
+        let line = buf.strip_suffix(b"\n").unwrap_or(&buf);
+
+        let mut rotation: i32 = 0;
+
+        for &byte in &line[1..] {
+            rotation = rotation * 10 + (byte - b'0') as i32;
+        }
+
+        match line[0] {
+            // rem_euclid always returns a non-negative result, unlike %
+            b'L' => {
+                position = (position - rotation).rem_euclid(100);
+            },
+            b'R' => {
+                position = (position + rotation).rem_euclid(100);
+            },
+            _ => return Err(anyhow!("Invalid input"))
+        }
+
+        if position == 0 {
+            result += 1;
+        }
+    }
+
+    Ok(result)
+}
+
+/// Find number of times the lock passes 0 while making forwards and reverse rotations
+/// from 0 to 99.
+fn part2(reader: &mut impl BufRead) -> Result<usize> {
+    let mut result = 0;
+    let mut position: i32 = 50;
+    let mut buf = Vec::new();
+
+    loop {
+        // Continually clearing keeps this loop zero-allocation
+        buf.clear();
+
+        // Read the line
+        let bytes_read = reader.read_until(b'\n', &mut buf)?;
+
+        if bytes_read == 0 { break; }  // EOF
+
+        let line = buf.strip_suffix(b"\n").unwrap_or(&buf);
+
+        let mut rotation: i32 = 0;
+
+        for &byte in &line[1..] {
+            rotation = rotation * 10 + (byte - b'0') as i32;
+        }
+
+        let rotation_sign: i32 = match line[0] {
+            // rem_euclid always returns a non-negative result, unlike %
+            b'L' => {
+                -1
+            },
+            b'R' => {
+                1
+            },
+            _ => return Err(anyhow!("Invalid input"))
+        };
+
+        // Loop and count number of times the position crosses a boundary
+        while rotation > 0 {
+            if rotation > 99 {
+                rotation -= 100;
+                result += 1;
+            } else {
+                position += rotation * rotation_sign;
+                rotation = 0;
+            }
+        }
+
+        // Cap position back between 0 - 99
+        if position < 0 || position > 99 {
+            position = position.rem_euclid(100);
+            result += 1
+        }
+
+        if position == 0 {
+            result += 1;
+        }
+    }
+
+    Ok(result)
+}
+
+// --- Helpers ---
+
+fn reader_from_file_path(path: &str) -> Result<BufReader<File>> {
+    let file = File::open(path).with_context(|| format!("Failed to open file at path {}", path))?;
+    Ok(BufReader::new(file))
+}
+
+fn read_lines(path: &str) -> Result<Vec<String>> {
+    let file = File::open(path).with_context(|| format!("Failed to open {}", path))?;
+    let reader = BufReader::new(file);
+    reader.lines().collect::<Result<_, _>>().map_err(|e| e.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    const TEST_INPUT: &[u8] = b"L80\nR20";
+
+    #[test]
+    fn test_part1() {
+        let mut reader = BufReader::new(TEST_INPUT);
+        assert_eq!(part1(&mut reader).unwrap(), 0);
+    }
+
+    #[rstest]
+    #[case(b"L30", 0)]
+    #[case(b"R50", 1)]
+    #[case(b"R50\nL50\nR50", 2)]
+    #[case(b"L80\nR1000\nL30", 12)]
+    fn test_part2(
+        #[case] input: &[u8],
+        #[case] expected: usize
+    ) {
+        let mut reader = BufReader::new(input);
+        assert_eq!(part2(&mut reader).unwrap(), expected);
+    }
 }
